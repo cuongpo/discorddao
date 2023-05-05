@@ -13,6 +13,7 @@ contract DAO {
         address memberAddress;
         uint memberSince;
         uint tokenBalance;
+        uint exp;
     }
 
     address[] public members;
@@ -33,7 +34,8 @@ contract DAO {
             {
                 memberAddress: _member,
                 memberSince: block.timestamp,
-                tokenBalance: 100
+                tokenBalance: 100,
+                exp: 0
             }
         );
 
@@ -48,7 +50,8 @@ contract DAO {
             {
                 memberAddress: address(0),
                 memberSince: 0,
-                tokenBalance: 0
+                tokenBalance: 0,
+                exp: 0
             }
         );
 
@@ -66,6 +69,8 @@ contract DAO {
     }
 
     function createProposal(string memory _description) public {
+        Member storage member = memberInfo[msg.sender];
+        member.exp += 100;
         proposals.push(
             Proposal(
                 {
@@ -83,6 +88,8 @@ contract DAO {
         require(memberInfo[msg.sender].memberAddress != address(0),"only members can vote");
         require(balances[msg.sender]>=_tokenAmount,"not enough tokens");
         require(votes[msg.sender][_proposalId] == false,"you already voted");
+        Member storage member = memberInfo[msg.sender];
+        member.exp += 10;
         votes[msg.sender][_proposalId] = true;
         memberInfo[msg.sender].tokenBalance -= _tokenAmount;
         proposals[_proposalId].voteCount += _tokenAmount;
@@ -95,6 +102,14 @@ contract DAO {
         require(proposals[_proposalId].executed == false ,"already executed");
         require(proposals[_proposalId].voteCount > totalSupply /2 ,"not enough votes");
         proposals[_proposalId].executed = true;
+    }
+
+    function getMemberLevel(uint _exp) internal pure returns(uint) {
+        return (_exp / 100) + 1;
+    }
+
+    function getMemberExp(address _memberAddress) public view returns(uint) {
+        return (memberInfo[_memberAddress].exp);
     }
 
 }
