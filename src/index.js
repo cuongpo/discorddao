@@ -1,7 +1,10 @@
 import { config } from 'dotenv';
-import { Client, GatewayIntentBits, MessageFlags, Routes } from 'discord.js';
+import { Client, GatewayIntentBits, MessageFlags, Routes, AttachmentBuilder } from 'discord.js';
 import { REST } from '@discordjs/rest';
 import { get_exp } from "./get_exp.js";
+import canvacord from 'canvacord';
+const img = "https://cdn.discordapp.com/embed/avatars/0.png";
+
 config();
 
 const client = new Client({
@@ -27,8 +30,26 @@ client.on('interactionCreate', (interaction) => {
                 console.log(interaction.user.id);
                 const memberDiscordId = interaction.user.id;
                 const memberExp = await get_exp(memberDiscordId);
+                // console.log(memberExp);
+                var memberExpNumber = parseInt(memberExp, 10);
+                const level = memberExpNumber/100;
+                memberExpNumber = memberExpNumber%100;
                 // console.log('Member eexp:', memberExp);
-                interaction.reply({ content: `Hey there! The member experience is ${memberExp}`});
+                // interaction.reply({ content: `Hey there! The member experience is ${memberExp}`});
+                const rank = new canvacord.Rank()
+                .setAvatar(img)
+                .setLevel(level)
+                .setCurrentXP(memberExpNumber)
+                .setRequiredXP(100)
+                .setStatus("dnd")
+                .setProgressBar("#FFFFFF", "COLOR")
+                .setUsername(interaction.user.username)
+                .setDiscriminator(interaction.user.discriminator);
+                rank.build()
+                .then(data => {
+                    const attachment = new AttachmentBuilder(data);
+                    interaction.reply({files:[attachment]});
+                });
             }
 
             // Call the main function
