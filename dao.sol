@@ -14,6 +14,7 @@ contract DAO {
         uint memberSince;
         uint tokenBalance;
         uint exp;
+        uint discordId;
     }
 
     address[] public members;
@@ -35,7 +36,8 @@ contract DAO {
                 memberAddress: _member,
                 memberSince: block.timestamp,
                 tokenBalance: 100,
-                exp: 0
+                exp: 0,
+                discordId: 0
             }
         );
 
@@ -51,7 +53,8 @@ contract DAO {
                 memberAddress: address(0),
                 memberSince: 0,
                 tokenBalance: 0,
-                exp: 0
+                exp: 0,
+                discordId: 0
             }
         );
 
@@ -110,6 +113,20 @@ contract DAO {
 
     function getMemberExp(address _memberAddress) public view returns(uint) {
         return (memberInfo[_memberAddress].exp);
+    }
+
+    function linkDiscordId(uint _discordId) public {
+        Member storage member = memberInfo[msg.sender];
+        member.discordId = _discordId;
+    }
+
+    function getExpByDiscordId(uint _discordId) public view returns(uint) {
+        for (uint i=0;i<members.length;i++) {
+            if (memberInfo[members[i]].discordId == _discordId) {
+                return (memberInfo[members[i]].exp);
+            } 
+        }
+        return (0);
     }
 
 }
